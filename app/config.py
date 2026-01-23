@@ -1,4 +1,8 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from pathlib import Path
+import logging
+
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 class Settings(BaseSettings):
@@ -7,7 +11,9 @@ class Settings(BaseSettings):
     APP_NAME: str = "aibot"
     API_PREFIX: str = "/api/v1"
 
-    DATABASE_URL: str = "sqlite:///./aibot.db"
+    DATABASE_URL: str | None = None
+    LOG_FOLDER: str | None = None
+    LOG_LEVEL: int = logging.INFO
 
     REDIS_URL: str = "redis://localhost:6379/0"
     POLL_INTERVAL_MINUTES: int = 30

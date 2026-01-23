@@ -3,18 +3,39 @@ from __future__ import annotations
 from datetime import datetime
 import logging
 
-from celery_worker import celery_app
+from celery import Celery
 from sqlalchemy.orm import Session
 from sqlalchemy import select, desc
 
+from app.config import settings
 from app.database import SessionLocal
 from app.models import Source, Keyword, NewsItem, Post, PostStatus
 from app.news_parser.sites import parse_site_source
 from app.news_parser.telegram import parse_tg_source
 from app.ai.generator import generate_telegram_post
 from app.telegram.publisher import publish_to_channel
+from app.logging_config import setup_logging
 
-log = logging.getLogger("aibot")
+setup_logging()
+log = logging.getLogger(__name__)
+
+celery_app = Celery(
+    "aibot",
+    broker=settings.REDIS_URL,
+    backend=settings.REDIS_URL,
+)
+
+celery_app.conf.timezone = "UTC"
+celery_app.conf.task_routes = {"app.tasks.*": {"queue": "default"}}
+
+celery_app.conf.beat_schedule = {
+    "run-pipeline-every-n-minutes": {
+        "task": "app.tasks.run_pipeline_task",
+        "schedule": settings.POLL_INTERVAL_MINUTES * 60,
+    }
+}
+
+celery_app.autodiscover_tasks(["app"])
 
 
 def _get_db() -> Session:
@@ -31,6 +52,7 @@ def _passes_keyword_filter(db: Session, text: str) -> bool:
 
 @celery_app.task(name="app.tasks.run_pipeline_task")
 def run_pipeline_task():
+    log.info("Running pipeline task")
     db = _get_db()
     try:
         sources = db.execute(select(Source).where(Source.enabled == True)).scalars().all()  # noqa: E712

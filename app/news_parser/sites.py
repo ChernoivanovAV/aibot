@@ -5,6 +5,7 @@ from email.utils import parsedate_to_datetime
 import httpx
 from bs4 import BeautifulSoup
 
+from app.database import get_db, SessionLocal
 from app.models import Source
 from app.utils import sha256_hex
 
@@ -63,3 +64,23 @@ def parse_habr_rss(source: Source) -> list[dict]:
 def strip_html(html: str) -> str:
     s = BeautifulSoup(html, "lxml")
     return s.get_text(" ", strip=True)
+
+
+if __name__ == "__main__":
+    db = SessionLocal()
+    print("DB URL:", db.bind.url)
+
+    # 🔥 включить echo
+    db.bind.echo = True
+
+    try:
+        source = db.get(Source, 1)
+        print(vars(source))
+        news = parse_habr_rss(source)
+        print(news)
+
+
+    finally:
+        db.close()
+    # news = parse_habr_rss()
+    # print(news)
