@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import asyncio
 from telethon import TelegramClient
-from ..config import settings
+from app.config import settings
 
 
 def get_client() -> TelegramClient:
