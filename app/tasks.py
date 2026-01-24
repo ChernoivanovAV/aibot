@@ -169,3 +169,7 @@ def publish_post_task(post_id: int):
         raise
     finally:
         db.close()
+
+
+if __name__ == "__main__":
+    generate_post_task.delay(1)

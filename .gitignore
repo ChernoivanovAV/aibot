@@ -4,3 +4,4 @@
 **/.venv
 **/aibot.db
 **/logs
+**/tg.session

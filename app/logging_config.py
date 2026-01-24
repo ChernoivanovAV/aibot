@@ -11,6 +11,7 @@ def setup_logging():
     if root.handlers:
         return
 
+    LOG_FOLDER.mkdir(parents=True, exist_ok=True)
 
     handler = RotatingFileHandler(
         LOG_FILE,

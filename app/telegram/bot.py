@@ -18,3 +18,7 @@ async def _send_async(channel: str, text: str) -> None:
 
 def send_message(channel: str, text: str) -> None:
     asyncio.run(_send_async(channel, text))
+
+
+if __name__ == "__main__":
+   get_client()

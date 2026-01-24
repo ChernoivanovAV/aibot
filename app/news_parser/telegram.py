@@ -5,9 +5,9 @@ from datetime import datetime, timezone
 from telethon import TelegramClient
 from telethon.tl.types import Message
 
-from ..config import settings
-from ..models import Source
-from ..utils import sha256_hex
+from app.config import settings
+from app.models import Source
+from app.utils import sha256_hex
 
 
 def parse_tg_source(source: Source) -> list[dict]:
