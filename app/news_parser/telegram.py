@@ -6,12 +6,20 @@ from telethon import TelegramClient
 from telethon.tl.types import Message
 
 from app.config import settings
+from app.database import SessionLocal
 from app.models import Source
 from app.utils import sha256_hex
+import logging
+from pprint import pprint
+
+log = logging.getLogger(__name__)
 
 
 def parse_tg_source(source: Source) -> list[dict]:
     """Sync wrapper for Celery."""
+    log.info("Parsing Telegram source")
+    log.info(f"source.url: {source.url}")
+
     if not settings.TG_API_ID or not settings.TG_API_HASH:
         return []
     return asyncio.run(_parse_tg_async(source))
@@ -59,3 +67,13 @@ async def _parse_tg_async(source: Source) -> list[dict]:
             })
 
     return items
+
+
+if __name__ == "__main__":
+    db = SessionLocal()
+    print("DB URL:", db.bind.url)
+    db.bind.echo = True
+    source = db.get(Source, 2)
+    print(vars(source))
+    items = parse_tg_source(source)
+    pprint(items)
