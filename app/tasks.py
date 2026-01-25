@@ -70,7 +70,10 @@ def run_pipeline_task():
 
             for it in items:
                 full_text = f"{it.get('title','')}\n{it.get('summary','')}\n{it.get('raw_text','') or ''}"
+
+                log.info(f"Спарсили новость: {it.get('summary','')}")
                 if not _passes_keyword_filter(db, full_text):
+                    log.info(f"_passes_keyword_filter: False")
                     continue
 
                 news = NewsItem(**it)
@@ -124,6 +127,8 @@ def generate_post_task(news_id: int):
         return {"post_id": post.id}
 
     except Exception as e:
+        log.info(e)
+
         db.rollback()
         post = db.execute(
             select(Post).where(Post.news_id == news_id).order_by(desc(Post.id))
