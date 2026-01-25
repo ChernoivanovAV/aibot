@@ -57,6 +57,7 @@ def run_pipeline_task():
     try:
         sources = db.execute(select(Source).where(Source.enabled == True)).scalars().all()  # noqa: E712
         created_news_ids: list[int] = []
+        log.info("Found %s enabled sources", len(sources))
 
         for src in sources:
             try:
@@ -71,9 +72,9 @@ def run_pipeline_task():
             for it in items:
                 full_text = f"{it.get('title','')}\n{it.get('summary','')}\n{it.get('raw_text','') or ''}"
 
-                log.info(f"Спарсили новость: {it.get('summary','')}")
+                log.info("Спарсили новость: %s", it.get("summary", ""))
                 if not _passes_keyword_filter(db, full_text):
-                    log.info(f"_passes_keyword_filter: False")
+                    log.info("Keyword filter rejected news for source=%s", src.name)
                     continue
 
                 news = NewsItem(**it)
@@ -127,7 +128,7 @@ def generate_post_task(news_id: int):
         return {"post_id": post.id}
 
     except Exception as e:
-        log.info(e)
+        log.exception("Generate post failed for news_id=%s: %s", news_id, e)
 
         db.rollback()
         post = db.execute(
@@ -171,6 +172,7 @@ def publish_post_task(post_id: int):
             post.status = PostStatus.failed
             post.error = str(e)
             db.commit()
+        log.exception("Publish post failed for post_id=%s: %s", post_id, e)
         raise
     finally:
         db.close()

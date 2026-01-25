@@ -1,9 +1,10 @@
-import logging
-
 from openai import OpenAI, AsyncOpenAI
 from app.config import settings, BASE_DIR
 from httpx_socks import SyncProxyTransport
 import httpx
+import logging
+
+log = logging.getLogger(__name__)
 
 
 def get_openai_client() -> OpenAI:
@@ -23,8 +24,8 @@ def get_openai_client() -> OpenAI:
 
     http_client = httpx.Client(**client_kwargs)
 
-    logging.info("OpenAI Client created")
-    logging.info(f"OPENAI_BASE_URL: {settings.OPENAI_BASE_URL}")
+    log.info("OpenAI Client created")
+    log.info("OPENAI_BASE_URL: %s", settings.OPENAI_BASE_URL)
 
     return OpenAI(
         base_url=settings.OPENAI_BASE_URL,
