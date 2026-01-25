@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import asyncio
 from telethon import TelegramClient
 from app.config import settings
@@ -8,12 +6,24 @@ from app.config import settings
 def get_client() -> TelegramClient:
     if not settings.TG_API_ID or not settings.TG_API_HASH:
         raise RuntimeError("TG_API_ID/TG_API_HASH are not set")
-    return TelegramClient(settings.TG_SESSION, settings.TG_API_ID, settings.TG_API_HASH)
+
+    if not settings.TG_BOT_TOKEN:
+        raise RuntimeError("TG_BOT_TOKEN is not set")
+
+    return TelegramClient(
+        settings.TG_BOT_SESSION,
+        settings.TG_API_ID,
+        settings.TG_API_HASH,
+    )
 
 
 async def _send_async(channel: str, text: str) -> None:
-    async with get_client() as client:
+    client = get_client()
+    await client.start(bot_token=settings.TG_BOT_TOKEN)
+    try:
         await client.send_message(channel, text)
+    finally:
+        await client.disconnect()
 
 
 def send_message(channel: str, text: str) -> None:
@@ -21,4 +31,4 @@ def send_message(channel: str, text: str) -> None:
 
 
 if __name__ == "__main__":
-   get_client()
+    get_client()

@@ -1,6 +1,5 @@
 from bs4 import BeautifulSoup
 from datetime import datetime, timezone
-from email.utils import parsedate_to_datetime
 
 
 def get_full_url(link_tag, base_url: str) -> str | None:
