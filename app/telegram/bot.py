@@ -1,5 +1,6 @@
 import asyncio
 from telethon import TelegramClient
+from telethon.sessions import MemorySession
 from app.config import settings
 
 
@@ -10,17 +11,16 @@ def get_client() -> TelegramClient:
     if not settings.TG_BOT_TOKEN:
         raise RuntimeError("TG_BOT_TOKEN is not set")
 
-    return TelegramClient(
-        settings.TG_BOT_SESSION,
-        settings.TG_API_ID,
-        settings.TG_API_HASH,
-    )
+    # Use in-memory session to avoid sqlite locking when multiple workers publish.
+    session = MemorySession()
+    return TelegramClient(session, settings.TG_API_ID, settings.TG_API_HASH)
 
 
 async def _send_async(channel: str, text: str) -> None:
     client = get_client()
     await client.start(bot_token=settings.TG_BOT_TOKEN)
     try:
+        await asyncio.sleep(2)
         await client.send_message(channel, text)
     finally:
         await client.disconnect()
