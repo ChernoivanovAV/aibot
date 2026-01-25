@@ -5,3 +5,4 @@
 **/aibot.db
 **/logs
 **/tg.session
+**/*.session

@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import logging
+from app.news_parser.http_client import get
 from app.news_parser.utils import get_full_url, parse_date
 from app.utils import sha256_hex
 
@@ -60,7 +61,7 @@ def parser_list_html(html: str) -> list[dict]:
 def fetch_news_list() -> list[dict[str, str]]:
     raw_items: list[dict[str, str]] = []
     try:
-        response = requests.get(NEWS_URL, headers=DEFAULT_HEADERS, timeout=10)
+        response = get(url=NEWS_URL, headers=DEFAULT_HEADERS)
     except requests.RequestException as exc:
         logger.warning(f'При парсинге возникла ошибка {exc}')
         return raw_items
