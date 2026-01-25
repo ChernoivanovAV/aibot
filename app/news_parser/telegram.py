@@ -18,9 +18,10 @@ log = logging.getLogger(__name__)
 def parse_tg_source(source: Source) -> list[dict]:
     """Sync wrapper for Celery."""
     log.info("Parsing Telegram source")
-    log.info(f"source.url: {source.url}")
+    log.info("source.url: %s", source.url)
 
     if not settings.TG_API_ID or not settings.TG_API_HASH:
+        log.warning("Telegram credentials are not set; skipping source=%s", source.name)
         return []
     return asyncio.run(_parse_tg_async(source))
 

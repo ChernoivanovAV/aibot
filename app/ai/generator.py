@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import time
+import logging
 from openai import RateLimitError, APIError
 from ..config import settings
 from ..models import NewsItem
@@ -21,6 +22,7 @@ USER_TEMPLATE = """Сделай короткий пост для Telegram на �
 Ссылка: {url}
 """
 
+log = logging.getLogger(__name__)
 
 def generate_telegram_post(news: NewsItem) -> str:
     client = get_openai_client()
@@ -46,9 +48,11 @@ def generate_telegram_post(news: NewsItem) -> str:
             return resp.choices[0].message.content.strip()
         except (RateLimitError, APIError) as e:
             last_err = e
+            log.warning("OpenAI API error on attempt %s/5: %s", attempt + 1, e)
             time.sleep(1.5 * (attempt + 1))
         except Exception as e:
             # non-retryable
+            log.exception("OpenAI unexpected error")
             raise e
 
     raise RuntimeError(f"OpenAI failed after retries: {last_err}")

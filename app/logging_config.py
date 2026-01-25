@@ -8,25 +8,40 @@ LOG_FILE = LOG_FOLDER / 'aibot.log'
 
 def setup_logging():
     root = logging.getLogger()
-    if root.handlers:
+    existing_file_handler = any(
+        isinstance(handler, RotatingFileHandler)
+        and getattr(handler, "baseFilename", None) == str(LOG_FILE)
+        for handler in root.handlers
+    )
+    existing_stream_handler = any(
+        isinstance(handler, logging.StreamHandler)
+        and not isinstance(handler, RotatingFileHandler)
+        for handler in root.handlers
+    )
+    if existing_file_handler:
         return
 
     LOG_FOLDER.mkdir(parents=True, exist_ok=True)
 
-    handler = RotatingFileHandler(
+    file_handler = RotatingFileHandler(
         LOG_FILE,
         maxBytes=10 * 1024 * 1024,  # 10 MB
         backupCount=5,
         encoding="utf-8"
     )
+    stream_handler = None if existing_stream_handler else logging.StreamHandler()
 
     formatter = logging.Formatter(
         "[%(asctime)s] %(levelname)s %(name)s: %(message)s",
         "%Y-%m-%d %H:%M:%S"
     )
 
-    handler.setFormatter(formatter)
+    file_handler.setFormatter(formatter)
+    if stream_handler:
+        stream_handler.setFormatter(formatter)
 
     root = logging.getLogger()
     root.setLevel(settings.LOG_LEVEL)
-    root.addHandler(handler)
+    root.addHandler(file_handler)
+    if stream_handler:
+        root.addHandler(stream_handler)
