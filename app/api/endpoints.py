@@ -7,10 +7,9 @@ from app.models import Source, Keyword, NewsItem, Post
 from app.api.schemas import (
     SourceCreate, SourceUpdate, SourceOut,
     KeywordCreate, KeywordOut,
-    NewsOut, PostOut,
-    GenerateRequest, PublishRequest
+    NewsOut, PostOut
 )
-from app.tasks import generate_post_task, publish_post_task, run_pipeline_task
+from app.tasks import run_pipeline_task,publish_posts_task, ai_generate_posts_task, collect_tg_news_task, collect_site_news_task
 
 router = APIRouter()
 
@@ -98,7 +97,6 @@ def list_news(limit: int = 50, db: Session = Depends(get_db)):
 def list_posts(limit: int = 50, db: Session = Depends(get_db)):
     return db.execute(select(Post).order_by(desc(Post.id)).limit(limit)).scalars().all()
 
-
 # ---- Manual triggers (Celery)
 @router.post("/pipeline/run")
 def run_pipeline():
@@ -107,12 +105,12 @@ def run_pipeline():
 
 
 @router.post("/generate/")
-def generate_manual(payload: GenerateRequest):
-    task = generate_post_task.delay(payload.news_id)
+def generate_manual():
+    task = ai_generate_posts_task.delay()
     return {"task_id": task.id}
 
 
 @router.post("/publish/")
-def publish_manual(payload: PublishRequest):
-    task = publish_post_task.delay(payload.post_id)
+def publish_manual():
+    task = publish_posts_task.delay()
     return {"task_id": task.id}

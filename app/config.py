@@ -26,9 +26,9 @@ class Settings(BaseSettings):
     TG_API_ID: int | None = None
     TG_API_HASH: str | None = None
     TG_SESSION: str | None = str(BASE_DIR / 'tg.session')
-    TG_TARGET_CHANNEL: str | None = None
-    TG_BOT_TOKEN: str | None = None
     TG_BOT_SESSION: str | None = str(BASE_DIR / 'tg.bot.session')
+    TG_BOT_TOKEN: str | None = None
+    TG_TARGET_CHANNEL: str | None = None
 
 
 settings = Settings()
