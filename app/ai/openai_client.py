@@ -1,13 +1,17 @@
-from openai import OpenAI, AsyncOpenAI
-from app.config import settings, BASE_DIR
-from httpx_socks import SyncProxyTransport
-import httpx
+"""OpenAI client factory with configured HTTP settings."""
+
 import logging
+
+import httpx
+from openai import OpenAI
+
+from app.config import settings
 
 log = logging.getLogger(__name__)
 
 
 def get_openai_client() -> OpenAI:
+    """Create a configured OpenAI client with optional proxy support."""
     if not settings.OPENAI_API_KEY:
         raise RuntimeError("OPENAI_API_KEY is not set")
 

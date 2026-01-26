@@ -1,21 +1,23 @@
+"""Celery tasks for collecting, generating, and publishing posts."""
+
 from __future__ import annotations
 
 import asyncio
+from contextlib import contextmanager
 from datetime import datetime
 import logging
 
 from celery import Celery
+from sqlalchemy import select
 from sqlalchemy.orm import Session
-from sqlalchemy import select, desc
 
+from app.ai.generator import generate_telegram_post
 from app.config import settings
 from app.database import SessionLocal
-from app.models import Source, Keyword, NewsItem, Post, PostStatus
+from app.models import Keyword, NewsItem, Post, PostStatus, Source
 from app.news_parser.sites import parse_site_source
 from app.news_parser.telegram import parse_tg_source
-from app.ai.generator import generate_telegram_post
 from app.telegram.publisher import publish_to_channel
-from contextlib import contextmanager
 
 log = logging.getLogger(__name__)
 
@@ -48,6 +50,7 @@ celery_app.autodiscover_tasks(["app"])
 
 @contextmanager
 def get_db():
+    """Provide a transactional scope around a series of operations."""
     db = SessionLocal()
     try:
         yield db
@@ -60,6 +63,7 @@ def get_db():
 
 
 def _passes_keyword_filter(db: Session, text: str) -> bool:
+    """Return True if the text matches at least one configured keyword."""
     keywords = db.execute(select(Keyword)).scalars().all()
     if not keywords:
         return True
@@ -68,6 +72,7 @@ def _passes_keyword_filter(db: Session, text: str) -> bool:
 
 
 def _collect_for_type(source_type: str) -> dict:
+    """Collect news for a given source type and create draft posts."""
     log.info("Collecting news for type %s", source_type)
     created_news_ids: list[int] = []
 
@@ -123,6 +128,7 @@ def _collect_for_type(source_type: str) -> dict:
 
 @celery_app.task(name="app.tasks.run_pipeline_task")
 def run_pipeline_task():
+    """Run full pipeline in a single task."""
     log.info("Run app.tasks.run_pipeline_task")
     collect_site_news_task()
     collect_tg_news_task()
@@ -133,29 +139,30 @@ def run_pipeline_task():
 @celery_app.task(name="app.tasks.collect_site_news_task")
 def collect_site_news_task():
     """
-        Collect news from site sources.
+    Collect news from site sources.
 
-        Periodic task (Celery Beat).
-        Parses enabled site sources and saves new NewsItem entries.
-        Deduplication is handled by unique fingerprint.
-        """
+    Periodic task (Celery Beat).
+    Parses enabled site sources and saves new NewsItem entries.
+    Deduplication is handled by unique fingerprint.
+    """
     return _collect_for_type("site")
 
 
 @celery_app.task(name="app.tasks.collect_tg_news_task")
 def collect_tg_news_task():
     """
-        Collect news from Telegram sources.
+    Collect news from Telegram sources.
 
-        Periodic task (Celery Beat).
-        Uses Telethon to fetch messages from enabled channels.
-        Stores only new items (deduplicated).
-        """
+    Periodic task (Celery Beat).
+    Uses Telethon to fetch messages from enabled channels.
+    Stores only new items (deduplicated).
+    """
     return _collect_for_type("tg")
 
 
 @celery_app.task(name="app.tasks.ai_generate_posts_task")
 def ai_generate_posts_task():
+    """Generate post texts for news items without generated text."""
     log.info("Run app.tasks.ai_generate_posts_task")
     posts_generated: list[int] = []
     with get_db() as db:
@@ -206,10 +213,12 @@ def ai_generate_posts_task():
 
 @celery_app.task(name="app.tasks.publish_posts_task")
 def publish_posts_task():
+    """Publish generated posts to Telegram."""
     asyncio.run(_publish_posts_task())
 
 
 async def _publish_posts_task():
+    """Async helper to publish generated posts."""
     post_published: list[int] = []
     with get_db() as db:
         posts = (

@@ -1,7 +1,12 @@
+"""Telegram parser for channel messages using Telethon."""
+
 from __future__ import annotations
 
 import asyncio
 from datetime import datetime, timezone
+import logging
+from pprint import pprint
+
 from telethon import TelegramClient
 from telethon.tl.types import Message
 
@@ -9,14 +14,12 @@ from app.config import settings
 from app.database import SessionLocal
 from app.models import Source
 from app.utils import sha256_hex
-import logging
-from pprint import pprint
 
 log = logging.getLogger(__name__)
 
 
 def parse_tg_source(source: Source) -> list[dict]:
-    """Sync wrapper for Celery."""
+    """Sync wrapper for Celery to parse a Telegram source."""
     log.info("Parsing Telegram source")
     log.info("source.url: %s", source.url)
 
@@ -27,6 +30,7 @@ def parse_tg_source(source: Source) -> list[dict]:
 
 
 async def _parse_tg_async(source: Source) -> list[dict]:
+    """Collect messages from a Telegram source asynchronously."""
     items: list[dict] = []
 
     async with TelegramClient(settings.TG_SESSION, settings.TG_API_ID, settings.TG_API_HASH) as client:

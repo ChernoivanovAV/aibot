@@ -1,11 +1,14 @@
-from pydantic_settings import BaseSettings, SettingsConfigDict
-from pathlib import Path
 import logging
+from pathlib import Path
+
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 class Settings(BaseSettings):
+    """Application settings loaded from environment variables."""
+
     model_config = SettingsConfigDict(env_file=BASE_DIR / ".env", env_file_encoding="utf-8")
 
     APP_NAME: str = "aibot"
@@ -25,8 +28,8 @@ class Settings(BaseSettings):
 
     TG_API_ID: int | None = None
     TG_API_HASH: str | None = None
-    TG_SESSION: str | None = str(BASE_DIR / 'tg.session')
-    TG_BOT_SESSION: str | None = str(BASE_DIR / 'tg.bot.session')
+    TG_SESSION: str | None = str(BASE_DIR / "tg.session")
+    TG_BOT_SESSION: str | None = str(BASE_DIR / "tg.bot.session")
     TG_BOT_TOKEN: str | None = None
     TG_TARGET_CHANNEL: str | None = None
 

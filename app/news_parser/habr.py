@@ -1,6 +1,10 @@
+"""Habr-specific HTML parser for news feed."""
+
+import logging
+
 import requests
 from bs4 import BeautifulSoup
-import logging
+
 from app.news_parser.http_client import get
 from app.news_parser.utils import get_full_url, parse_date
 from app.utils import sha256_hex
@@ -22,6 +26,7 @@ logger = logging.getLogger(__name__)
 
 
 def parser_list_html(html: str) -> list[dict]:
+    """Parse the Habr news HTML page into a list of dicts."""
     soup = BeautifulSoup(html, 'html.parser')
     news_items: list[dict] = []
 
@@ -59,15 +64,16 @@ def parser_list_html(html: str) -> list[dict]:
 
 
 def fetch_news_list() -> list[dict[str, str]]:
+    """Fetch the Habr news list and parse it."""
     raw_items: list[dict[str, str]] = []
     try:
         response = get(url=NEWS_URL, headers=DEFAULT_HEADERS)
     except requests.RequestException as exc:
-        logger.warning(f'При парсинге возникла ошибка {exc}')
+        logger.warning("При парсинге возникла ошибка %s", exc)
         return raw_items
 
     if response.status_code != 200:
-        logger.warning(f'При парсинге возник статус код {response.status_code}')
+        logger.warning("При парсинге возник статус код %s", response.status_code)
         return raw_items
 
     raw_items = parser_list_html(response.text)

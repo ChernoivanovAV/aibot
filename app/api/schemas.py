@@ -1,9 +1,14 @@
+"""Pydantic schemas for API payloads and responses."""
+
 from datetime import datetime
+from typing import Literal, Optional
+
 from pydantic import BaseModel, Field
-from typing import Optional, Literal
 
 
 class SourceCreate(BaseModel):
+    """Payload for creating a new source."""
+
     type: Literal["site", "tg"]
     name: str
     url: str
@@ -11,12 +16,16 @@ class SourceCreate(BaseModel):
 
 
 class SourceUpdate(BaseModel):
+    """Payload for updating an existing source."""
+
     name: Optional[str] = None
     url: Optional[str] = None
     enabled: Optional[bool] = None
 
 
 class SourceOut(BaseModel):
+    """Serialized source for API responses."""
+
     id: int
     type: str
     name: str
@@ -29,10 +38,14 @@ class SourceOut(BaseModel):
 
 
 class KeywordCreate(BaseModel):
+    """Payload for creating a keyword."""
+
     word: str = Field(min_length=1, max_length=128)
 
 
 class KeywordOut(BaseModel):
+    """Serialized keyword for API responses."""
+
     id: int
     word: str
 
@@ -41,6 +54,8 @@ class KeywordOut(BaseModel):
 
 
 class NewsOut(BaseModel):
+    """Serialized news item for API responses."""
+
     id: int
     title: str
     url: Optional[str]
@@ -56,6 +71,8 @@ class NewsOut(BaseModel):
 
 
 class PostOut(BaseModel):
+    """Serialized post for API responses."""
+
     id: int
     news_id: int
     generated_text: Optional[str]
@@ -66,4 +83,3 @@ class PostOut(BaseModel):
 
     class Config:
         from_attributes = True
-
