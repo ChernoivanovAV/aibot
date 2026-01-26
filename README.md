@@ -94,3 +94,5 @@ celery -A celery_worker.celery_app beat -l info
 ```bash
 curl -X POST http://127.0.0.1:8000/api/v1/generate/
 ```
+
+ 
