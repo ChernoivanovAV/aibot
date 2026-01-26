@@ -87,15 +87,15 @@ celery -A celery_worker.celery_app beat -l info
 5) **Ручной запуск.** Весь пайплайн можно запустить вручную через `POST /api/v1/pipeline/run`, что удобно для тестирования.
 
 ## Примеры API-запросов
-### Добавить RSS-источник
+### Добавить источник
 `POST /api/v1/sources/`
 ```bash
 curl -X POST http://127.0.0.1:8000/api/v1/sources/ \
   -H "Content-Type: application/json" \
   -d '{
     "type": "site",
-    "name": "Habr RSS",
-    "url": "https://habr.com/ru/rss/all/all/?fl=ru",
+    "name": "Habr.ru",
+    "url": "https://habr.com",
     "enabled": true
   }'
 ```
