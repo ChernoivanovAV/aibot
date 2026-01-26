@@ -1,17 +1,20 @@
-from fastapi import FastAPI
-from app.config import settings
-from app.database import engine, Base
-from app.api.endpoints import router as api_router
-from app.logging_config import setup_logging
 import logging
+
+from fastapi import FastAPI
+
+from app.api.endpoints import router as api_router
+from app.config import settings
+from app.database import Base, engine
+from app.logging_config import setup_logging
 
 
 def create_app() -> FastAPI:
+    """Create and configure the FastAPI application instance."""
     setup_logging()
     log = logging.getLogger(__name__)
 
     app = FastAPI(title=settings.APP_NAME)
-    log.info(f"Application created")
+    log.info("Application created")
 
     # MVP: автосоздание таблиц (позже можно Alembic)
     Base.metadata.create_all(bind=engine)

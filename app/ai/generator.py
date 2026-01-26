@@ -1,12 +1,15 @@
+"""Prompting logic for AI-generated Telegram posts."""
+
 from __future__ import annotations
 
-import time
 import logging
-from openai import RateLimitError, APIError
+import time
+
+from openai import APIError, RateLimitError
+
 from ..config import settings
 from ..models import NewsItem
 from .openai_client import get_openai_client
-
 
 SYSTEM_PROMPT = "Ты редактор новостного Telegram-канала. Пиши ярко, кратко, без воды."
 
@@ -24,7 +27,9 @@ USER_TEMPLATE = """Сделай короткий пост для Telegram на �
 
 log = logging.getLogger(__name__)
 
+
 def generate_telegram_post(news: NewsItem) -> str:
+    """Generate a Telegram post text for a given news item."""
     client = get_openai_client()
 
     prompt = USER_TEMPLATE.format(

@@ -9,5 +9,6 @@
 **/*.db-shm
 **/*.db-wal
 **/*.session-journal
+celerybeat-schedule*
 
 M4 Project FastAPI - telegram .md
