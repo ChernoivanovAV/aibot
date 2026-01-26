@@ -2,11 +2,14 @@ from pathlib import Path
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
 from app.config import settings, BASE_DIR
-
+import logging
 DEFAULT_SQLITE_PATH = BASE_DIR / "aibot.db"
 DEFAULT_SQLITE_URL = f"sqlite:///{DEFAULT_SQLITE_PATH}"
 
 DATABASE_URL = settings.DATABASE_URL or DEFAULT_SQLITE_URL
+
+logging.info(f"DATABASE_URL: {DATABASE_URL}")
+
 
 
 class Base(DeclarativeBase):

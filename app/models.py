@@ -66,7 +66,11 @@ class Post(Base):
     __tablename__ = "posts"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    news_id: Mapped[int] = mapped_column(ForeignKey("news_items.id"), nullable=False)
+    news_id: Mapped[int] = mapped_column(
+        ForeignKey("news_items.id"),
+        nullable=False,
+        unique=True,
+    )
 
     generated_text: Mapped[str | None] = mapped_column(Text, nullable=True)
     published_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)

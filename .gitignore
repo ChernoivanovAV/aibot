@@ -6,3 +6,8 @@
 **/logs
 **/tg.session
 **/*.session
+**/*.db-shm
+**/*.db-wal
+**/*.session-journal
+
+M4 Project FastAPI - telegram .md

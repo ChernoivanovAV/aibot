@@ -67,10 +67,3 @@ class PostOut(BaseModel):
     class Config:
         from_attributes = True
 
-
-class GenerateRequest(BaseModel):
-    news_id: int
-
-
-class PublishRequest(BaseModel):
-    post_id: int
